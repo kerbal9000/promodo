@@ -1,6 +1,5 @@
 from time import monotonic
 from textual.app import ComposeResult
-from textual.screen import Screen
 from textual.containers import Horizontal, Vertical, Center, Middle
 from textual.widgets import Static, Button, ProgressBar
 from textual.reactive import reactive
@@ -8,7 +7,7 @@ from textual import on
 
 import math
 
-# from widgets.countdown import CountdownDisplay
+from widgets.countdown import CountdownDisplay
 # from core.storage import log_session
 # from core.sound import play_sound
 
@@ -18,12 +17,13 @@ SHORT_BREAK = "short_break"  #names for the phases
 LONG_BREAK = "long_break"
 
 PHASE_DURATIONS = {
-    WORK: 5,
-    SHORT_BREAK: 1 * 60, 
-    LONG_BREAK: 2 * 60,
+    WORK: 25 * 60 , # working timer 25 mins
+    SHORT_BREAK: 5 * 60, # short break 5 mins
+    LONG_BREAK: 30 * 60, # long break 30 mins after every 4 work shifts
 }
 
-class TimerScreen(Screen):
+class TimerScreen(Vertical):
+   
     phase=reactive(WORK)
     running=reactive(False)
     remaining=reactive(0.0)
@@ -35,15 +35,18 @@ class TimerScreen(Screen):
     paused_at: float = 0.0 
 
     def compose(self):
-        with Middle():
-            with Center():
-                yield Static("10:00",id="countdown")
-                with Horizontal():
 
-                    yield Button("Start", id="start", variant="success")
-                    yield Button("Pause", id="pause", variant="primary")
-                    yield Button("Skip", id="skip", variant="warning")
-                    yield Button("Reset", id="reset", variant="error")
+        with Vertical(id="timer-container"):
+            yield CountdownDisplay(id="countdown")
+            yield ProgressBar(total=100,id="progress",show_eta=False,show_percentage=False)
+            #yield Static("10:00",id="countdown")
+
+            with Horizontal(id="controls"):
+                yield Button("Start", id="start")
+                yield Button("Pause", id="pause")
+                yield Button("Skip", id="skip")
+                yield Button("Reset", id="reset")
+
 
     def on_mount(self) -> None:
         self._timer = None
@@ -64,15 +67,23 @@ class TimerScreen(Screen):
     def tick(self):
         elapsed = monotonic() - self.start_time
         self.remaining = max(0,self.phase_duration - elapsed)
+        fraction = self.remaining / self.phase_duration
+
+        self.query_one("#progress",ProgressBar).progress = fraction * 100
+        self.update_bar_color(fraction)
+
+
         if self.remaining <= 0:
             self.end_phase()
-    
+
     def watch_remaining(self,value):
         total = math.ceil(value)
         minutes = total // 60
         sec = total % 60
        
-        self.query_one("#countdown").update(content=f"{minutes:02d}:{int(sec):02d}")
+        #self.query_one("#countdown").update(content=f"{minutes:02d}:{int(sec):02d}")
+        self.query_one(CountdownDisplay).remaining = value
+
 
     def end_phase(self):
         if self.phase == WORK:
@@ -112,6 +123,16 @@ class TimerScreen(Screen):
     def reset(self):
         self.start_phase(self.phase)
     
+    def update_bar_color(self, fraction_left): 
+        bar = self.query_one("#progress", ProgressBar)
+        if fraction_left > 0.5:
+            bar.query_one("Bar").styles.color = "green"
+        elif fraction_left > 0.2:
+            bar.query_one("Bar").styles.color = "yellow"
+        else:
+            bar.query_one("Bar").styles.color = "red"
+
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case "start":

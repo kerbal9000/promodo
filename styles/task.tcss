@@ -1,0 +1,34 @@
+TaskScreen {
+    background: $background
+}
+TaskScreen #task-header-label {
+    height: auto;
+    align: center top;
+    border: red;
+    color: $primary;
+}
+TaskScreen #task-header-label Label {
+    margin-left: 20;
+    margin-right: 30;
+}
+TaskScreen .task-row {
+    width: 95%;
+    height: auto;
+}
+
+TaskScreen .marker {
+    width: 4;
+}
+
+TaskScreen .task-id {
+    width: 5;
+}
+
+TaskScreen .task-title {
+    width: 1fr;
+}
+
+TaskScreen .task-pomos {
+    width: 10;
+    text-align: right;
+}

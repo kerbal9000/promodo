@@ -1,0 +1,56 @@
+TimerScreen {
+    background: $background;
+    
+}
+
+TimerScreen #timer-container {
+    align: center middle;
+    width: 100%;
+    height: 100%;
+    
+}
+
+TimerScreen #countdown {
+    width: auto;
+    text-style: bold;
+    color: $primary;
+    margin-bottom:1;
+    margin-left: 24;
+    
+}
+
+TimerScreen #progress {
+    width: 60;
+}
+
+TimerScreen #controls {
+    width: auto;
+    height: auto;
+    margin-left: 5;
+    
+    
+}
+# TimerScreen does everything inside of the controlss so bascially the buttons itself the group
+TimerScreen #controls Button { 
+    margin: 0 1;
+    min-width: 10;
+    content-align:center middle;
+    
+}
+
+TimerScreen #start{
+    color: $primary;
+    
+}
+
+TimerScreen #pause{
+    color: $primary;
+}
+
+TimerScreen #skip{
+    color: $primary;
+}
+
+TimerScreen #reset{
+    color: $primary;
+}

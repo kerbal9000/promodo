@@ -6,9 +6,9 @@ from textual.reactive import reactive
 from textual import on
 
 import math
-
+import datetime
 from widgets.countdown import CountdownDisplay
-# from core.storage import log_session
+from core.storage import log_session
 # from core.sound import play_sound
 
 
@@ -31,6 +31,7 @@ class TimerScreen(Vertical):
     start_time:float = 0.0
     phase_duration:int = 0
     pomodoro_count : int = 0
+
     _timer = None 
     paused_at: float = 0.0 
 
@@ -39,7 +40,6 @@ class TimerScreen(Vertical):
         with Vertical(id="timer-container"):
             yield CountdownDisplay(id="countdown")
             yield ProgressBar(total=100,id="progress",show_eta=False,show_percentage=False)
-            #yield Static("10:00",id="countdown")
 
             with Horizontal(id="controls"):
                 yield Button("Start", id="start")
@@ -61,8 +61,8 @@ class TimerScreen(Vertical):
         self.remaining = self.phase_duration
         self.running = False
 
-        #self._timer.resume()
         self._timer = self.set_interval(1,self.tick,pause=True)
+        self.start_dt = datetime.datetime.now() # keeps the record of the current start time
 
     def tick(self):
         elapsed = monotonic() - self.start_time
@@ -74,34 +74,40 @@ class TimerScreen(Vertical):
 
 
         if self.remaining <= 0:
-            self.end_phase()
+            self.end_phase(completed=True)
 
     def watch_remaining(self,value):
         total = math.ceil(value)
         minutes = total // 60
         sec = total % 60
        
-        #self.query_one("#countdown").update(content=f"{minutes:02d}:{int(sec):02d}")
         self.query_one(CountdownDisplay).remaining = value
 
 
-    def end_phase(self):
+    def end_phase(self,completed:bool = True):
+
+        log_session(start=self.start_dt,end=datetime.datetime.now(),phase=self.phase,completed=completed)
+        self.skipped = False
+
         if self.phase == WORK:
-            self.start_phase(SHORT_BREAK)
             self.pomodoro_count += 1
+
             if self.pomodoro_count >= 4:
                 self.pomodoro_count = 0
                 self.start_phase(LONG_BREAK)
+                self.phase = LONG_BREAK
             else:
                 self.start_phase(SHORT_BREAK)
-
-        else:
+                self.phase = SHORT_BREAK
+            
+        elif self.phase == SHORT_BREAK or self.phase == LONG_BREAK:
             self.start_phase(WORK)
-   
-
+            self.phase = WORK
+        
     def skip_phase(self):
-        self.end_phase()
-
+        self.end_phase(completed=False)
+        
+    
     def pause(self):
         if self.running == False:
             return

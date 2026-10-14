@@ -1,28 +1,57 @@
-path_to_json = "storage/task.json"#needs to be changed to a proper directory make python make one
-import json,tempfile,os
+import json,tempfile,os,copy
 import datetime
-def load_tasks():
+from pathlib import Path
 
+path_to_json = Path("storage/task.json")
+
+DEFAULTS = {
+    "tasks": {},
+    "session_log": [],
+    "next_task_id": 1,
+    "next_session_id": 1,
+    "next_id":1,
+} # defualts for an mpty file
+
+
+def load_tasks():
+    
     return load_data()["tasks"]
 
-def load_data():
+def load_data() -> dict:
+    if not path_to_json.exists():
+        return copy.deepcopy(DEFAULTS)
+
     try:
         with open(path_to_json) as f:
             raw = f.read()
-            data = json.loads(raw)
-            data.setdefault("tasks", {})
-            data.setdefault("session_log", [])
-            data.setdefault("next_task_id", 1)
-            data.setdefault("next_id", 1)
-            return data
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        return {"tasks": {}, "next_id": 1}
+    except OSError:
+        return copy.deepcopy(DEFAULTS)
 
-def save_data(data, path=path_to_json): # saves data if file closes unexpectadly
-    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path))
-    with os.fdopen(fd, "w") as f:
-        json.dump(data, f, indent=2)
-    os.replace(tmp, path)
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return copy.deepcopy(DEFAULTS)
+
+    if not isinstance(data, dict):
+        return copy.deepcopy(DEFAULTS)
+
+    data.setdefault("tasks", {})
+    data.setdefault("session_log", [])
+    data.setdefault("next_task_id", 1)
+    data.setdefault("next_id", 1)
+   
+    if not isinstance(data["tasks"], dict):
+        data["tasks"] = {}
+    if not isinstance(data["session_log"], list):
+        data["session_log"] = []
+
+    return data
+
+def save_data(data: dict) -> None: # saves data if file closes unexpectadly
+    path_to_json.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path_to_json.with_suffix(".tmp")
+    tmp.write_text(json.dumps(data, indent=2))
+    tmp.replace(path_to_json)
 
 def add_task(title,priority=3,done=False):
     data = load_data()
@@ -64,7 +93,6 @@ def toggle_done(task_id):
 def load_sessions() -> list[dict]: #history tab on mount will call it
     data = load_data()
     return data.get("session_log",{})
-
 
 def log_session(start, end, phase, completed,task_id=None) -> int:
     data = load_data()

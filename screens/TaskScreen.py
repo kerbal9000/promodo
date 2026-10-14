@@ -39,12 +39,7 @@ class TaskScreen(Vertical):
             classes="task-row",
             )
             lv.append(ListItem(row, id=f"task-{task_id}"))
-        
-    # def on_list_view_selected(self, event: ListView.Selected) -> None: # gives the id when a row is clicked
-    #     task_id = event.item.id.removeprefix("task-") # just a method
-
-    #     print(f"returned task id for row {task_id}")
-        
+                
 
     def set_active(self, task_id):
         for row in self.query(TaskRow):

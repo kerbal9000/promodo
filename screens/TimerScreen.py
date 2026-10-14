@@ -6,6 +6,7 @@ from textual.reactive import reactive
 from textual import on
 
 import math
+
 import datetime
 from widgets.countdown import CountdownDisplay
 from core.storage import log_session
@@ -83,7 +84,6 @@ class TimerScreen(Vertical):
        
         self.query_one(CountdownDisplay).remaining = value
 
-
     def end_phase(self,completed:bool = True):
 
         log_session(start=self.start_dt,end=datetime.datetime.now(),phase=self.phase,completed=completed)
@@ -107,7 +107,6 @@ class TimerScreen(Vertical):
     def skip_phase(self):
         self.end_phase(completed=False)
         
-    
     def pause(self):
         if self.running == False:
             return

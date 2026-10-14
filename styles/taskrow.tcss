@@ -1,17 +1,13 @@
-TaskRow {
-    layout: grid;
-    grid-size: 4 1;             /* 4 columns, 1 row */
-    grid-columns: 3 1fr 6 8;    /* checkbox | title | priority | pomodoro */
-    height: 3;
-    padding: 0 1;
+TaskScreen {
+
     align-vertical: middle;
 }
-TaskRow .task-priority {
+TaskScreen .task-priority {
     color: $accent;
     text-align: center;
 }
 
-TaskRow.active {
+TaskScreen .active {
     background: $accent 20%;
     border-left: thick $accent;
 }

@@ -12,7 +12,6 @@ from widgets.countdown import CountdownDisplay
 from core.storage import log_session
 # from core.sound import play_sound
 
-
 WORK = "work"
 SHORT_BREAK = "short_break"  #names for the phases 
 LONG_BREAK = "long_break"
@@ -52,6 +51,7 @@ class TimerScreen(Vertical):
     def on_mount(self) -> None:
         self._timer = None
         self.start_phase(WORK)
+        self.query_one("#progress",ProgressBar).progress = 500 # sets progress bar to 100 just for now 
 
     def start_phase(self,phase):
         if self._timer is not None:
@@ -136,8 +136,7 @@ class TimerScreen(Vertical):
             bar.query_one("Bar").styles.color = "yellow"
         else:
             bar.query_one("Bar").styles.color = "red"
-
-
+            
     def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case "start":

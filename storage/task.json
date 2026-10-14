@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "3": {
+      "title": "task added here",
+      "priority": 3,
+      "done": true
+    }
+  },
+  "session_log": [],
+  "next_task_id": 1,
+  "next_session_id": 1,
+  "next_id": 4
+}

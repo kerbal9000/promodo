@@ -1,3 +1,6 @@
+import sys
+import os
+
 from textual.app import App, ComposeResult
 from textual import events
 from textual.widgets import Button, Header, Label,Static ,TabbedContent,TabPane
@@ -7,14 +10,26 @@ from screens.DashboardScreen import DashboardScreen
 
 from themes.themes_handler import ALL_THEMES,DEFAULT_THEME
 
+if getattr(sys, 'frozen', False):
+    # Running in a PyInstaller/Nuitka bundle
+    _BASE_DIR = sys._MEIPASS
+else:
+    # Running in a normal Python environment
+    _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
 class MyApp(App): # subclass of app handles the main things
     TITLE = "PROMODO"
-    CSS_PATH=["styles/timer.tcss","styles/task.tcss","styles/dashboard.tcss"] #add the tcss to the list and let it be prefixed with the class name
+    CSS_PATH = [
+        os.path.join(_BASE_DIR, "styles", "timer.tcss"),
+        os.path.join(_BASE_DIR, "styles", "task.tcss"),
+        os.path.join(_BASE_DIR, "styles", "dashboard.tcss"),
+        os.path.join(_BASE_DIR, "styles", "taskrow.tcss"),
+     ]
+      #add the tcss to the list and let it be prefixed with the class name
     #self is the app instance 
     def compose(self) -> ComposeResult: # compose is a method that is called once to describe the widget tree
-        yield Header()
-        yield Button("EXIT", id="exit", variant="default")
-        
+        yield Header()    
         with TabbedContent():
             with TabPane("Dashboard",id="Dashboard"):
                 yield DashboardScreen()
@@ -27,12 +42,6 @@ class MyApp(App): # subclass of app handles the main things
         for t in ALL_THEMES: #for all the themes in the themes folder
             self.register_theme(t) #register said theme
         self.theme = DEFAULT_THEME # make it that theme
-        
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        match event.button.id:
-            case "exit":
-                self.exit("exit")
 
 if __name__ == "__main__":
     app = MyApp()
